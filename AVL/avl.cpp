@@ -7,9 +7,8 @@
 #include <iostream>
 
 // Node represents a single node in AVL tree.
-typedef struct Node
-{
-    int key, bf;
+typedef struct Node {
+    int         key, bf;
     struct Node *left, *right;
 } Node;
 
@@ -17,21 +16,17 @@ typedef struct Node
  * getNode returns a new node.
  * @return a new node
  */
-Node *getNode()
-{
-    Node *tmp = new Node();
-    tmp->key = 0;
-    tmp->bf = 0;
-    tmp->left = NULL;
-    tmp->right = NULL;
+Node *getNode() {
+    Node *tmp = new Node;
+    tmp -> key = tmp -> bf = 0;
+    tmp -> left = tmp -> right = nullptr;
     return tmp;
 }
 
 typedef Node *Tree;
 
 // rotationType represents the rotation types of AVL tree.
-typedef enum
-{
+typedef enum rotationType {
     LL,
     RR,
     LR,
@@ -57,31 +52,21 @@ void inorderAVL(Tree);
  * @param T: a binary search tree
  * @param newKey: a key to insert
  */
-void insertBST(Tree *T, int newKey)
-{
-    Node *q = NULL;
+void insertBST(Tree *T, int newKey) {
+    Node *q = nullptr;
     Node *p = *T;
-    while (p != NULL)
-    {
-        if (newKey == p->key)
-            return;
+    while (p != nullptr) {
+        if (newKey == p -> key) return;
         q = p;
-        if (newKey < p->key)
-            p = p->left;
-        else
-            p = p->right;
+        if (newKey < p -> key) p = p -> left;
+        else p = p -> right;
     }
     Node *newNode = getNode();
-    newNode->key = newKey;
+    newNode -> key = newKey;
 
-    if (*T == NULL)
-        *T = newNode;
-    else if (newKey < q->key)
-        q->left = newNode;
-    else
-        q->right = newNode;
-
-    return;
+    if (*T == nullptr) *T = newNode;
+    else if (newKey < q -> key) q -> left = newNode;
+    else q -> right = newNode;
 }
 
 /**
@@ -89,108 +74,62 @@ void insertBST(Tree *T, int newKey)
  * @param T: a binary search tree
  * @param deleteKey: a key to delete
  */
-void deleteBST(Tree *T, int deleteKey)
-{
+void deleteBST(Tree *T, int deleteKey) {
     Node *p, *q, *r;
     p = *T;
-    q = NULL;
-    while (1)
-    {
-        if (p == NULL)
-            break;
-        if (p->key == deleteKey)
-            break;
-        if (p->key < deleteKey)
-        {
-            q = p;
-            p = p->right;
-        }
-        else
-        {
-            q = p;
-            p = p->left;
-        }
+    q = nullptr;
+    while (p != nullptr) {
+        if (p -> key == deleteKey) break;
+        q = p;
+        if (p -> key < deleteKey) p = p->right;
+        else p = p->left;
     }
 
-    if (p == NULL)
-        return;
-    if ((p->left == NULL) && (p->right == NULL))
-    {
-        if (q == NULL)
-        {
-            if (p == *T)
-                *T = NULL;
-        }
-        else
-        {
-            if (q->left == p)
-                q->left = NULL;
-            else
-                q->right = NULL;
-        }
+    if (p == nullptr) return;
+    if (p -> left == nullptr && p->right == nullptr) {
+        if (q == nullptr) *T = nullptr;
+        else if (q -> left == p) q -> left = nullptr;
+        else q -> right = nullptr;
+
+        delete p;
     }
 
-    else if ((p->left == NULL) || (p->right == NULL))
-    {
-        if (q == NULL)
-        {
-            if (p->left != NULL)
-                *T = p->left;
-            else
-                *T = p->right;
+    else if (p -> left == nullptr || p -> right == nullptr) {
+        if (q == nullptr) {
+            if (p -> left != nullptr) *T = p->left;
+            else *T = p -> right;
+        } else if (p->left != nullptr) {
+            if (q -> left == p) q->left = p->left;
+            else q -> right = p -> left;
+        } else {
+            if (q -> left == p) q -> left = p -> right;
+            else q -> right = p -> right;
         }
-        else
-        {
-            if (p->left != NULL)
-            {
-                if (q->left == p)
-                    q->left = p->left;
-                else
-                    q->right = p->left;
-            }
-            else
-            {
-                if (q->left == p)
-                    q->left = p->right;
-                else
-                    q->right = p->right;
-            }
-        }
-    }
-    else
-    {
-        r = NULL;
+
+        delete p;
+    } else {
         bool flag = false;
-        if (height(p->left) < height(p->right))
-        {
-            r = minNode(p->right);
+        if (height(p -> left) < height(p -> right)) {
+            r = minNode(p -> right);
             flag = true;
         }
-        else if (height(p->left) > height(p->right))
-        {
-            r = maxNode(p->left);
+        else if (height(p -> left) > height(p -> right)) {
+            r = maxNode(p -> left);
             flag = false;
-        }
-        else
-        {
-            if (noNodes(p->left) < noNodes(p->right))
-            {
-                r = minNode(p->right);
+        } else {
+            if (noNodes(p -> left) < noNodes(p -> right)) {
+                r = minNode(p -> right);
                 flag = true;
             }
-            else
-            {
-                r = maxNode(p->left);
+            else {
+                r = maxNode(p -> left);
                 flag = false;
             }
         }
-        p->key = r->key;
-        if (!flag)
-            deleteBST((Tree *)p->left, r->key);
-        else
-            deleteBST((Tree *)p->right, r->key);
+        p -> key = r -> key;
+
+        flag ? deleteBST(&(p -> right), r -> key) : deleteBST(&(p -> left), r -> key);
     }
-    return;
 }
 
 /**
@@ -200,75 +139,56 @@ void deleteBST(Tree *T, int deleteKey)
  * @param y: a node
  * @return the unbalanced node nearest to y
  */
-Node *updateBF(Tree *T, Node *y)
-{
+Node *updateBF(Tree *T, Node *y) {
     Node *p = y;
-    if (p == NULL)
+    if (p == nullptr)
         return p;
 
-    if (p->right == NULL && p->left == NULL)
-        p->bf = 0;
+    if (p -> right == nullptr && p -> left == nullptr)
+        p -> bf = 0;
 
-    else if (p->left == NULL || p->right == NULL)
-    {
-        if (p->left == NULL)
-            p->bf = -height(p->right);
-        else if (p->right == NULL)
-            p->bf = height(p->left);
+    else if (p -> left == nullptr || p -> right == nullptr) {
+        if (p -> left == nullptr)
+            p -> bf = -height(p->right);
+        else if (p -> right == nullptr)
+            p -> bf = height(p -> left);
     }
-    else
-        p->bf = height(p->left) - height(p->right);
-
-    if (p->bf == 2 || p->bf == -2)
-        return p;
-    else
-    {
+    else p -> bf = height(p -> left) - height(p -> right);
+    if (p -> bf == 2 || p -> bf == -2) return p;
+    else {
         updateBF(T, p->left);
         updateBF(T, p->right);
     }
-
     return *T;
 }
 
-int height(Node *T)
-{
-    if (T == NULL)
-        return 0;
-
-    if (height(T->left) > height(T->right))
-        return height(T->left) + 1;
-    else
-        return height(T->right) + 1;
+int height(Node *T) {
+    if (T == nullptr) return 0;
+    if (height(T -> left) > height(T -> right)) return height(T->left) + 1;
+    else return height(T -> right) + 1;
 }
 
-int noNodes(Node *T)
-{
-    if (T)
-        return noNodes(T->left) + noNodes(T->right) + 1;
-    else
-        return 1;
+int noNodes(Node *T) {
+    if (T) return noNodes(T -> left) + noNodes(T -> right) + 1;
+    else return 1;
 }
 
-Node *maxNode(Node *T)
-{
-    Node *q = NULL;
+Node *maxNode(Node *T) {
+    Node *q = nullptr;
     Node *p = T;
-    while (p)
-    {
+    while (p) {
         q = p;
-        p = p->right;
+        p = p -> right;
     }
     return q;
 }
 
-Node *minNode(Node *T)
-{
-    Node *q = NULL;
+Node *minNode(Node *T) {
+    Node *q = nullptr;
     Node *p = T;
-    while (p)
-    {
+    while (p) {
         q = p;
-        p = p->left;
+        p = p -> left;
     }
     return q;
 }
@@ -277,31 +197,28 @@ Node *minNode(Node *T)
  * rotateLL implements LL rotation in subtree rooted with x.
  * @param x: root node of subtree
  */
-void rotateLL(Node *x)
-{
-    Node *tmp = x->left;
-    x->left = tmp->right;
-    tmp->right = x;
+void rotateLL(Node *x) {
+    Node *tmp = x -> left;
+    x -> left = tmp -> right;
+    tmp -> right = x;
 }
 
 /**
  * rotateRR implements RR rotation in subtree rooted with x.
  * @param x: root node of subtree
  */
-void rotateRR(Node *x)
-{
-    Node *tmp = x->right;
-    x->right = tmp->left;
-    tmp->left = x;
+void rotateRR(Node *x) {
+    Node *tmp = x -> right;
+    x -> right = tmp -> left;
+    tmp -> left = x;
 }
 
 /**
  * rotateLR implements LR rotation in subtree rooted with x.
  * @param x: root node of subtree
  */
-void rotateLR(Node *x)
-{
-    Node *tmp = x->left;
+void rotateLR(Node *x) {
+    Node *tmp = x -> left;
     rotateRR(tmp);
     return rotateLL(x);
 }
@@ -310,9 +227,8 @@ void rotateLR(Node *x)
  * rotateRL implements RL rotation in subtree rooted with x.
  * @param x: root node of subtree
  */
-void rotateRL(Node *x)
-{
-    Node *tmp = x->right;
+void rotateRL(Node *x) {
+    Node *tmp = x -> right;
     rotateLL(tmp);
     return rotateRR(x);
 }
@@ -323,29 +239,20 @@ void rotateRL(Node *x)
  * @param newKey: a key to insert
  * @return rotation type
  */
-rotationType insertAVL(Tree *T, int newKey)
-{
+rotationType insertAVL(Tree *T, int newKey) {
     insertBST(T, newKey);
     Node *p = updateBF(T, *T);
-    if (p == NULL)
-        return NO;
+    if (p == nullptr) return NO;
 
-    if (p->bf == 2)
-    {
-        if (height(p->left) - height(p->right) == 2)
-            return LL;
-        else
-            return RR;
+    if (p -> bf == 2) {
+        if (height(p->left) - height(p->right) == 2) return LL;
+        else return RR;
     }
-    else if (p->bf == -2)
-    {
-        if (height(p->left) - height(p->right) == -2)
-            return RR;
-        else
-            return LL;
+    else if (p -> bf == -2) {
+        if (height(p -> left) - height(p -> right) == -2) return RR;
+        else return LL;
     }
-    else
-        return NO;
+    else return NO;
 }
 
 /**
@@ -354,30 +261,21 @@ rotationType insertAVL(Tree *T, int newKey)
  * @param deleteKey: a key to delete
  * @return rotation type
  */
-rotationType deleteAVL(Tree *T, int deleteKey)
-{
+rotationType deleteAVL(Tree *T, int deleteKey) {
     deleteBST(T, deleteKey);
     Node *p = updateBF(T, *T);
 
-    if (p == NULL)
-        return NO;
+    if (p == nullptr) return NO;
 
-    if (p->bf == 2)
-    {
-        if (height(p->left) - height(p->right) == 2)
-            return LL;
-        else
-            return RR;
+    if (p -> bf == 2) {
+        if (height(p->left) - height(p->right) == 2) return LL;
+        else return RR;
     }
-    else if (p->bf == -2)
-    {
-        if (height(p->left) - height(p->right) == -2)
-            return RR;
-        else
-            return LL;
+    else if (p->bf == -2) {
+        if (height(p -> left) - height(p -> right) == -2) return RR;
+        else return LL;
     }
-    else
-        return NO;
+    else return NO;
 }
 
 /**
@@ -386,11 +284,10 @@ rotationType deleteAVL(Tree *T, int deleteKey)
  */
 void inorderAVL(Tree T)
 {
-    if (T != NULL)
-    {
-        inorderAVL(T->left);
-        printf("%d ", T->key);
-        inorderAVL(T->right);
+    if (T != nullptr) {
+        inorderAVL(T -> left);
+        printf("%d ", T -> key);
+        inorderAVL(T -> right);
     }
 }
 
@@ -402,7 +299,7 @@ int main()
 
     const char *rotationTypes[] = {"LL", "RR", "LR", "RL", "NO"};
 
-    Tree T = NULL;
+    Tree T = nullptr;
 
     // insertion
     for (int i = 0; i < 20; i++)
@@ -420,7 +317,7 @@ int main()
         printf("\n");
     }
 
-    T = NULL;
+    T = nullptr;
 
     // reinsertion
     for (int i = 0; i < 20; i++)
