@@ -105,8 +105,8 @@ void deleteBST(Tree *T, int deleteKey) {
             if (q -> left == p) q -> left = p -> right;
             else q -> right = p -> right;
         }
-
         delete p;
+
     } else {
         bool flag = false;
         if (height(p -> left) < height(p -> right)) {
@@ -141,6 +141,7 @@ void deleteBST(Tree *T, int deleteKey) {
  */
 Node *updateBF(Tree *T, Node *y) {
     Node *p = y;
+
     if (p == nullptr)
         return p;
 
@@ -308,7 +309,6 @@ int main()
         inorderAVL(T);
         printf("\n");
     }
-
     // deletion
     for (int i = 0; i < 20; i++)
     {
