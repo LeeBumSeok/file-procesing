@@ -4,8 +4,8 @@
  * implementation of AVL tree
  */
 
+#include <stdio.h>
 #include <iostream>
-
 using namespace std;
 
 /**
@@ -24,55 +24,55 @@ typedef Node *Tree;
  */
 Node *getNode() {
   /* write your code here */
-    Node *tmp = new Node();
-    tmp->key = 0;
-    tmp->left = NULL;
-    tmp->right = NULL;
-    return tmp;
+  Node *tmp = new Node;
+  tmp->key =0;
+  tmp->bf=0;
+  tmp->left = NULL;
+  tmp->right = NULL;
+  return tmp;
 }
 
-int height(Node *T)
-{
-    if (T == NULL)
-        return 0;
-
-    if (height(T->left) > height(T->right))
-        return height(T->left) + 1;
-    else
-        return height(T->right) + 1;
+//find height of tree
+int height(Node* tmp){
+  //case of empty tree
+  if(tmp ==NULL){
+    return -1;
+  }
+  int left = height(tmp->left);
+  int right = height(tmp->right);
+  if(left>right){
+    return left +1;
+  }
+  else{
+    return right+1;
+  }
 }
 
-int noNodes(Node *T)
-{
-    if (T)
-        return noNodes(T->left) + noNodes(T->right) + 1;
-    else
-        return 1;
+//find maximal value of left child
+int maxNode(Node* tmp){
+  while(tmp->right!=NULL){
+    tmp = tmp->right;
+  }
+  return tmp->key;
 }
 
-Node *maxNode(Node *T)
-{
-    Node *q = NULL;
-    Node *p = T;
-    while (p)
-    {
-        q = p;
-        p = p->right;
-    }
-    return q;
+//find minimal value of rihgt child
+int minNode(Node* tmp){
+  while(tmp->left!=NULL){
+    tmp = tmp->left;
+  }
+  return tmp->key;
 }
 
-Node *minNode(Node *T)
-{
-    Node *q = NULL;
-    Node *p = T;
-    while (p)
-    {
-        q = p;
-        p = p->left;
-    }
-    return q;
+//find number of node each right child, left child
+int noNodes(Node* tmp ){
+  if(tmp == NULL){
+     return 0;}
+  else{
+    return noNodes(tmp->left) +noNodes(tmp->right)+1;
+  }
 }
+
 
 /**
  * updateBF updates balancing factors of nodes in T
@@ -134,29 +134,35 @@ void rotateRL(Tree *T, Node *x, Node *p) {
  * @return the inserted node
  */
 Node *insertBST(Tree *T, int newKey) {
-    Node *q = NULL;
-    Node *p = *T;
-    while (p != NULL)
-    {
-        if (newKey == p->key)
-            break;
-        q = p;
-        if (newKey < p->key)
-            p = p->left;
-        else
-            p = p->right;
+  /* write your code here */
+  // find lotation of node
+  Node* q =NULL; Node* p = *T;
+  while(p!=NULL){
+    if(newKey==p->key){
+      return p;
     }
-    Node *newNode = getNode();
-    newNode->key = newKey;
-
-    if (*T == NULL)
-        *T = newNode;
-    else if (newKey < q->key)
-        q->left = newNode;
-    else
-        q->right = newNode;
-
-    return nullptr;
+    q=p;
+    if(newKey<p->key){
+      p=p->left;
+    }
+    else{
+      p=p->right;
+    }
+  }
+  // make node with new key
+  Node* newNode = getNode();
+  newNode->key = newKey;
+  // insert
+  if(*T==NULL){
+    *T = newNode;
+  }
+  else if(newKey<q->key){
+    q->left = newNode;
+  }
+  else{
+    q->right= newNode;
+  }
+  return newNode;
 }
 
 /**
@@ -173,7 +179,8 @@ void insertAVL(Tree *T, int newKey) {
    * print "RL" if rotates RL
    */
   /* write your code here */
-  insertBST(T, newKey);
+  insertBST(T,newKey);
+
 }
 
 /**
@@ -183,106 +190,109 @@ void insertAVL(Tree *T, int newKey) {
  * @param deleteKey: a key to delete
  * @return the parent node of the deleted node
  */
-
 Node *deleteBST(Tree *T, int deleteKey) {
-    Node *p, *q, *r;
-    p = *T;
-    q = NULL;
-    while (1)
-    {
-        if (p->key == deleteKey)
-            break;
-        if (p->key < deleteKey)
-        {
-            q = p;
-            p = p->right;
-        }
-        else
-        {
-            q = p;
-            p = p->left;
-        }
+  /* write your code here */
+  //find lotation of node
+  Tree q =NULL; Tree p = *T;
+  while(p!=NULL){
+    if(deleteKey== p->key){
+      break;
     }
-
-    if (p == NULL)
-        return nullptr;
-    if ((p->left == NULL) && (p->right == NULL))
-    {
-        if (q == NULL)
-        {
-            if (p == *T)
-                T = NULL;
-        }
-        else
-        {
-            if (q->left == p)
-                q->left = NULL;
-            else
-                q->right = NULL;
-        }
+    q=p;
+    if(deleteKey< p->key){
+      p=p->left;
     }
-
-    else if ((p->left == NULL) || (p->right == NULL))
-    {
-        if (q == NULL)
-        {
-            if (p->left != NULL)
-                *T = p->left;
-            else
-                *T = p->right;
-        }
-        else
-        {
-            if (p->left != NULL)
-            {
-                if (q->left == p)
-                    q->left = p->left;
-                else
-                    q->right = p->left;
-            }
-            else
-            {
-                if (q->left == p)
-                    q->left = p->right;
-                else
-                    q->right = p->right;
-            }
-        }
+    else{
+      p=p->right;
     }
-    else
-    {
-        r = NULL;
-        bool flag = false;
-        if (height(p->left) < height(p->right))
-        {
-            r = minNode(p->right);
-            flag = true;
-        }
-        else if (height(p->left) > height(p->right))
-        {
-            r = maxNode(p->left);
-            flag = false;
-        }
-        else
-        {
-            if (noNodes(p->left) < noNodes(p->right))
-            {
-                r = minNode(p->right);
-                flag = true;
-            }
-            else
-            {
-                r = maxNode(p->left);
-                flag = false;
-            }
-        }
-        p->key = r->key;
-        if (!flag)
-            deleteBST(&p->left, r->key);
-        else
-            deleteBST(&p->right, r->key);
+  }
+  if(p==NULL){
+    return NULL;
+  }
+  //no child
+  if(p->left==NULL && p->right==NULL){
+    //case of root
+    if(p==*T){
+      q =NULL;
+      return NULL;
     }
-    return nullptr;
+    else{
+      if(q->left==p){
+        q->left ==NULL;
+      }
+      else{
+        q->right ==NULL;
+      }
+    }
+  }
+  // one child
+  if(p->left==NULL || p->right==NULL){
+    // case of root
+    if(q==NULL){
+      if(p->left!=NULL){
+        *T = p->left;
+      }
+      else{
+        *T=p->right;
+      }
+    }
+    else {
+    if(p->left!=NULL){
+      if(q->left==p){
+        q->left = p->left;
+      }
+      else{
+        q->right = p->left;
+      }
+    }
+    else{
+      if(q->left==p){
+        q->left = p->right;
+      }
+      else{
+        q->right=p->right;
+      }
+    }
+    }
+    return q;
+  }
+  //two child
+  else{
+    //0 is left, 1 is right
+    bool flag;
+    int r;
+    int leheight=height(p->left);
+    int riheight=height(p->right);
+    if(leheight>=riheight){
+      r = maxNode(p->left);
+      flag = 0;
+    }
+    //to change node with child who has higher height
+    else if(riheight>leheight){
+      r = minNode(p->right);
+      flag = 1;
+    }
+    else{
+      if(noNodes(p->left)>=noNodes(p->right)){
+        r = maxNode(p->left);
+        flag = 0;
+      }
+      else{
+        r = minNode(p->right);
+        flag=1;
+      }
+    }
+    //change key for proper value
+    p->key = r;
+    //delete node according to flag value
+    if(flag==0){
+      deleteBST(&p->left, r);
+    }
+    else{
+      deleteBST(&p->right, r);
+    }
+  }
+  return q;
 }
 
 /**
@@ -299,9 +309,8 @@ void deleteAVL(Tree *T, int deleteKey) {
    * print "RL" if rotates RL
    */
   /* write your code here */
-  deleteBST(T, deleteKey);
+  deleteBST(T,deleteKey);
 }
-
 
 /**
  * inorderAVL implements inorder traversal in T.
@@ -309,13 +318,11 @@ void deleteAVL(Tree *T, int deleteKey) {
  */
 void inorderAVL(Tree T) {
   /* write your code here */
-  if (T != NULL)
-    {
-        inorderAVL(T->left);
-        cout << T->key << " ";
-        inorderAVL(T->right);
-    }
-  
+  if(T!=NULL){
+    inorderAVL(T->left);
+    cout << T->key << " ";
+    inorderAVL(T->right);
+  }
 }
 
 int main() {
